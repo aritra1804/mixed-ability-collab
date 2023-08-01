@@ -3,13 +3,6 @@
 
 <!--[![Product Name Screen Shot][product-screenshot]](https://example.com)-->
 
-  This repository contains code designed to obtain and filter gaze data and send that to a website.
-  The functions inside the tobiiLive.py file are the most recent versions, tobiiTest was used to develop the eye tracking functions.
-  This code contains: data collection, filtering/processing, and visualization functions for the Tobii Pro Fusion eye tracker.
-  It is able to calculate centroids live, contains a custom calibration function, and can write data to a csv file afterwards.
-  This code contains a Python implementation of the Tobii I-VT Fixation Filter, which is a fixation classification algorithm.
-  There is also a sample webpage, web.html, with Javascript designed to handle live data receiving with a Flask server.
-  For more information, see the full description at the top of the tobiiLive file.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
