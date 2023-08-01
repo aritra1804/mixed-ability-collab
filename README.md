@@ -106,7 +106,7 @@ Project Link: [https://github.com/juno-b/mixed-ability-collab](https://github.co
 
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
-This project would not have been possible without the support and contributions of [Yanzi (Veronica) Lin](https://github.com/yanziv), [Joon Jang](https://github.com/joonbugs), and [Andrew Begel](https://github.com/abegel).
+This project would not have been possible without the support and contributions of [Juno Bartsch](https://github.com/juno-b) [Yanzi (Veronica) Lin](https://github.com/yanziv), [Joon Jang](https://github.com/joonbugs), and [Andrew Begel](https://github.com/abegel).
 
 Created at the Carnegie Mellon University [VariAbility Lab](https://github.com/cmu-variability) during the Summer 2023 REUSE program.
 
