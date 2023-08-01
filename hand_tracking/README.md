@@ -1,7 +1,7 @@
 <!-- ABOUT THIS FOLDER -->
 ## About This Folder
 
-<!--[![Product Name Screen Shot][product-screenshot]](https://example.com)-->
+This folder contains code that helps you set up hand tracking using an Azure Kinect Camera and find where users are pointing at on a monitor screen.
 
 <!-- GETTING STARTED -->
 ## Getting Started
