@@ -35,11 +35,11 @@ def graph(x, y, title, image_path):
     ax.imshow(img, extent=[0, width, 0, height])
     plt.scatter(x, y, facecolor = 'none', edgecolor = 'blue', label=title)
     # Set the x and y limits
-    # plt.xlim(0, width)
-    # plt.ylim(0, height)
+    plt.xlim(0, width)
+    plt.ylim(0, height)
     # set pic to "work experience"
-    plt.xlim(740, 1040)
-    plt.ylim(1010, 1055)
+    # plt.xlim(740, 1040)
+    # plt.ylim(1010, 1055)
     # Add labels and legend
     plt.xlabel('X (pixels)')
     plt.ylabel('Y (pixels)')
