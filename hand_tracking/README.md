@@ -83,6 +83,8 @@ Several factors can influence the accuracy of the intersection points. If the po
   <img src="images/azure_kinect.png" alt="Alt Text" width="500">
 </p>
 
+- The position of the top two corners of the monitor plane in 3D space was manually measured using a measuring tape, which can introduce challenges in calculating intersection points accurately. For improved precision, I recommend exploring alternative measuring instruments.
+
 Please consider these factors and adjust the code accordingly to achieve optimal accuracy in determining the intersection points.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
