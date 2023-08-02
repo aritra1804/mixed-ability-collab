@@ -71,9 +71,13 @@ Several factors can influence the accuracy of the intersection points. If the po
 
 - We utilize both the RGB camera and the depth camera of the Azure Kinect. Although they are on the same hardware, they are a few centimeters apart from each other, which could introduce some bias to the accuracy.
 
-- The monitor must be tilted at a specific angle. In our code, we have set the angle to 6 degrees, and this measurement was obtained using a Digital Angle Gauge. If you decide to change the angle, make sure to update the corresponding code, as it will affect the position of the monitor plane in 3D space.
+- The monitor must be tilted at a specific angle. In our code, we have set the angle to 6 degrees, and this measurement was obtained using a Digital Angle Gauge (see picture below). If you decide to change the angle, make sure to update the corresponding code, as it will affect the position of the monitor plane in 3D space.
+
+![Alt Text](images/angle.jpg)
 
 - We aligned the Azure Kinect depth camera (second camera from the left) to the center top of the monitor and assume it is positioned parallel to the floor. Achieving perfect alignment in real-life scenarios can be challenging, and using an adjustable tripod or other tools might help achieve better alignment.
+
+![Alt Text](images/azure_kinect.png)
 
 Please consider these factors and adjust the code accordingly to achieve optimal accuracy in determining the intersection points.
 
