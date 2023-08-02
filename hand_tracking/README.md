@@ -58,7 +58,7 @@ To see where the pointing vector intersects with the monitor plane, run **draw_i
 ## Documentation
 To see which joints we track in the code:
 
-- Joint IDs in MediaPipe: (scroll down to "Hand Landmark model bundle") [MediaPipe Gesture Recognizer](https://developers.google.com/mediapipe/solutions/vision/gesture_recognizer)
+- Joint IDs in MediaPipe: [MediaPipe Gesture Recognizer](https://developers.google.com/mediapipe/solutions/vision/gesture_recognizer) (scroll down to "Hand Landmark model bundle")
 - Joint IDs in Azure Kinect Body Tracking: [Azure Kinect Body Joints](https://learn.microsoft.com/en-us/azure/kinect-dk/body-joints)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
