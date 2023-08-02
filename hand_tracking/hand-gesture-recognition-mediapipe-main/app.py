@@ -1,7 +1,24 @@
+"""
+This file is the main file for calculating where users are pointing at on a monitor
+screen. It uses the MediaPipe library to detect hand landmarks and uses a trained
+model to classify the hand gestures. It also uses the Azure Kinect SDKs to detect 
+the location of the user's hand in 3D space. The program outputs the location of
+the user's right index finger tip in 3D space, and the location of the user's 
+right metacarpophalangeal joint in 3D space. It also outputs the intersection point
+between the line formed by the right index finger tip and the right metacarpophalangeal
+joint and the plane formed by the monitor screen. To see a plot of the intersection
+points and the plane in 3D or in 2D, run the draw_intersection_3d.py or draw_intersection_2d.py
+file in the same folder as this file. 
+
+@author Yanzi (Veronica) Lin in collaboration with Joon Jang and Professor Andrew
+Begel at the Cargnegie Mellon University VariAbility Lab. 
+Last modified: August 2023
+
+"""
+
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from threading import Thread
-from sympy import Point3D, Line3D,Plane
 import os
 import csv
 import math
@@ -104,14 +121,11 @@ def py_azure_kinect():
                                 joint.position.z,
                             )
                         )
-                        # print('joint_info:',joint_info)
                     elif joint.id > 16: # skip over the rest of joints
                         joint_queue.put(joint_info)
-                        # print("new loc added to joint_queue!")
-                        # print(type(joint))
                         # https://learn.microsoft.com/en-us/azure/kinect-dk/body-joints
                         # 14 is WRIST_RIGHT, 15 is HAND_RIGHT, 16 is HANDTIP_RIGHT
-                        # Print joint information
+
 
 def find_third_point_on_tilted_screen(point1,width,angle):
     """
@@ -305,14 +319,9 @@ def mediapipe():
 
                     # Hand sign classification
                     hand_sign_id = keypoint_classifier(pre_processed_landmark_list)
+                    # Output Location of joints of index finger only when pointing
                     if hand_sign_id == 2:  # Point gesture
                         point_history.append(landmark_list[8])
-
-                        # Output Location of joints of index finger only when pointing
-
-                        # Assuming 'image' is the NumPy array representing the image
-                        # image_height, image_width, _ = image.shape # 3rd value is # of color channels, rgb -> 3
-
                         # print("Image Width (Pixels):", image_width) # 1290 for azure kinect rgb camera
                         # print("Image Height (Pixels):", image_height) # 720 for azure kinect rgb camera
 
@@ -326,7 +335,7 @@ def mediapipe():
                         x_5, y_5, z_5 = landmark_list[5][0], landmark_list[5][1], hand_landmarks.landmark[5].z
                         x_8, y_8, z_8 = landmark_list[8][0], landmark_list[8][1], hand_landmarks.landmark[8].z
                         
-                        # Notice that in this code, x and y coordinates represent pixe locations in the image,
+                        # Notice that in this code, x and y coordinates represent pixel locations in the image,
                         # and z coordinate represents the landmark depth, with the depth at the wrist being the origin
                         # print(f"Landmark 0: x={x_0}, y={y_0}, z={z_0}")
                         # print(f"Landmark 5: x={x_5}, y={y_5}, z={z_5}")
@@ -336,13 +345,8 @@ def mediapipe():
                         # check https://developers.google.com/mediapipe/solutions/vision/gesture_recognizer#hand_landmark_model_bundle
                         # for which joints this is outputting
 
-                        # print("REACHED HERE!")
-                        # add a timer here 
-                        # latency (loop time) 2 to 3 frames per second + time to the first number (delay?)
                         if not joint_queue.empty():
                             joint_info = joint_queue.get() # see detail of joint_info in py_azure_kinect
-                            # print('Retrieved Joint Info!!!')
-                            # print('Retrieved Joint Info:',joint_info)
 
                             _, wrist_x, wrist_y, wrist_z = joint_info[0]
                             _, tip_x, tip_y, tip_z = joint_info[1]
@@ -358,15 +362,6 @@ def mediapipe():
                             # (tip_z - wrist_z)/(z_8-z_0) = (mcp_z-wrist_z)/(z_5-z_0)
                             # therefore, mcp_z = (tip_z - wrist_z)/(z_8-z_0)*(z_5-z_0) + wrist_z
                             mcp_x, mcp_y, mcp_z = (tip_x/x_8)*x_5, (tip_y/y_8)*y_5, (tip_z-wrist_z)/(z_8-z_0)*(z_5-z_0)+wrist_z
-
-                            # print('calculated mcp loc:',mcp_x,mcp_y,mcp_z)
-                            # print('           distance btw mcp and wrist',math.sqrt(pow(wrist_x-mcp_x,2)+pow(wrist_y-mcp_y,2)+pow(wrist_z-mcp_z,2)))
-                            # mcp_x, mcp_y, mcp_z = (tip_x/x_8)*x_5, (tip_y/y_8)*y_5, (tip_z/z_8)*z_5
-                            # finger_direction = [tip_x - mcp_x, tip_y - mcp_y, tip_z - mcp_z]
-                            # print('Tip:',tip_x,tip_y,tip_z)
-                            # print('mcp:',mcp_x,mcp_y,mcp_z)
-                            # print('finger direction:',finger_direction)
-                            # intersection_point = isect_line_plane_v3([tip_x,tip_y,tip_z],[mcp_x,mcp_y,mcp_z],point4,normal_vector)
 
                             # Define the points that form the plane
                             plane_points = get_all_plane_points(top_left_coords,top_right_coords,screen_width,titled_angle)
@@ -390,6 +385,7 @@ def mediapipe():
                             # Append the intersection_point to the CSV file
                             with open(csv_file_path, mode='a', newline='') as csv_file:
                                 writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+                                # uncomment the following line to filter out intersection points not on the screen
                                 # if intersection_point is not None and -258.5 <= intersection_point[0] <= 258.5 and 27 <= intersection_point[1] <= 348.23057220395225 and 0 <= intersection_point[2] <= 33.762693635452074:  # Check if the point is within the plane
                                 writer.writerow({'intersection_x': intersection_point[0], 'intersection_y': intersection_point[1], 'intersection_z': intersection_point[2]})
                             # indicate processing is complete for this item
@@ -799,14 +795,13 @@ Thread(target = py_azure_kinect).start()
 
 
 # if __name__ == '__main__':
-#         point1 = (258.5,27,0)
-#         # top right: 
-#         point2 = (-258.5,27,0)
-#         # find bottom left:
-#         point3 = find_third_point_on_tilted_screen(point1,323,6)
-#         # find bottom right:
-#         point4 = find_third_point_on_tilted_screen(point2,323,6)
-#         print(point3)
-#         print(point4)
-#     # main()
-#     print(find_third_point_on_tilted_screen((-60,20,0),500,30))
+    # point1 = (258.5,27,0)
+    # # top right: 
+    # point2 = (-258.5,27,0)
+    # # find bottom left:
+    # point3 = find_third_point_on_tilted_screen(point1,323,6)
+    # # find bottom right:
+    # point4 = find_third_point_on_tilted_screen(point2,323,6)
+    # print(point3)
+    # print(point4)
+    # main()

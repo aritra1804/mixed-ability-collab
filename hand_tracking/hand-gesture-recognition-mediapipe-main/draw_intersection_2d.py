@@ -12,7 +12,8 @@ monitor = get_monitors()[0]
 width = monitor.width
 height = monitor.height
 max_y = 348.23057220395225 # max y value in mm
-# the following functions are from Juno's Tobii.py file, and these two files can be combined 
+
+# the following functions are from Tobii.py file, and these two files can be combined 
 # to plot both the eye tracking data and the pointing data on the same graph
 def flip_y(cen_y):
     """
@@ -61,7 +62,7 @@ def convert_3d_to_2d(val,axis):
 
     Logic of the conversion:
     1. add 258.5 to the X values so that all X values are positive
-    2. flip y values so that the y axis increases as you go up
+    2. flip y values so that the y axis increases as you go up (the y axis of the azure kinect increases as you go down)
     3. scale the X values to the range [0, 1920] and the Y values to the range [0, 1200]
 
     Note that if you are using this function to display eye gaze and hand data on a website, 

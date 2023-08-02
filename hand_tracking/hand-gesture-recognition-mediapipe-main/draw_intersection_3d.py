@@ -4,6 +4,7 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 import numpy as np
 
 # Points defining the plane
+# Note that the points are copied over from running get_all_plane_points() in app.py in the same folder
 points = [
     (258.5, 348.23057220395225, 33.762693635452074),
     (-258.5, 348.23057220395225, 33.762693635452074),
