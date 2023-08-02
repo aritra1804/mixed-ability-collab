@@ -80,7 +80,7 @@ Several factors can influence the accuracy of the intersection points. If the po
 - We aligned the Azure Kinect depth camera (second camera from the left) to the center top of the monitor and assume it is positioned parallel to the floor. Achieving perfect alignment in real-life scenarios can be challenging, and using an adjustable tripod or other tools might help achieve better alignment.
 
 <p align="center">
-  <img src="images/azure_kinect.png" alt="Alt Text" width="600">
+  <img src="images/azure_kinect.png" alt="Alt Text" width="100">
 </p>
 
 Please consider these factors and adjust the code accordingly to achieve optimal accuracy in determining the intersection points.
