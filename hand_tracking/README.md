@@ -62,3 +62,19 @@ To see which joints we track in the code:
 - Joint IDs in Azure Kinect Body Tracking: [Azure Kinect Body Joints](https://learn.microsoft.com/en-us/azure/kinect-dk/body-joints)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Improve Accuracy
+
+Several factors can influence the accuracy of the intersection points. If the positioning of the monitor and the Azure Kinect camera differs from the setup used in this project, you may need to make adjustments to the code. Consider the following aspects:
+
+- The display of the 24'' Dell monitor has a resolution of 1920 x 1200 pixels.
+
+- We utilize both the RGB camera and the depth camera of the Azure Kinect. Although they are on the same hardware, they are a few centimeters apart from each other, which could introduce some bias to the accuracy.
+
+- The monitor must be tilted at a specific angle. In our code, we have set the angle to 6 degrees, and this measurement was obtained using a Digital Angle Gauge. If you decide to change the angle, make sure to update the corresponding code, as it will affect the position of the monitor plane in 3D space.
+
+- We aligned the Azure Kinect depth camera (second camera from the left) to the center top of the monitor and assume it is positioned parallel to the floor. Achieving perfect alignment in real-life scenarios can be challenging, and using an adjustable tripod or other tools might help achieve better alignment.
+
+Please consider these factors and adjust the code accordingly to achieve optimal accuracy in determining the intersection points.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
