@@ -88,3 +88,24 @@ Several factors can influence the accuracy of the intersection points. If the po
 Please consider these factors and adjust the code accordingly to achieve optimal accuracy in determining the intersection points.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Leap Motion 
+
+For this project, we initially attempted to utilize a Leap Motion controller for hand gesture tracking. If you wish to explore Leap Motion, you can find a sample project in "LeapSample.vcxproj" within the "LeapSample" folder. However, if Leap Motion is not relevant to your interests, feel free to disregard this part of the README.
+
+To run the code, you will need Ultraleap tracking software v5.12, which you can download by clicking "Download Gemini for Windows" on [Leap Motion Tracking Software](https://developer.leapmotion.com/tracking-software-download). Please note that opening the project requires Visual Studio to be installed.
+
+Below is an image of the Leap Motion controller we used in this project:
+
+<p align="center">
+  <img src="images/leap.png" alt="Leap Motion Controller" width="500">
+</p>
+
+The desk setup for utilizing the Leap Motion controller is depicted below:
+
+<p align="center">
+  <img src="images/desk.png" alt="Desk Setup with Leap Motion" width="500">
+</p>
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
