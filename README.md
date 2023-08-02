@@ -22,7 +22,7 @@
   <summary>Table of Contents</summary>
   <ol>
     <li>
-      <a href="#about-the-project">About The Project</a>
+      <a href="#about-the-project">About Eye Tracking</a>
       <ul>
         <li><a href="#built-with">Built With</a></li>
       </ul>
@@ -40,8 +40,8 @@
   </ol>
 </details>
 
-<!-- ABOUT THE PROJECT -->
-## About The Project
+<!-- ABOUT EYE TRACKING -->
+## About Eye Tracking
 
 <!--[![Product Name Screen Shot][product-screenshot]](https://example.com)-->
 
@@ -54,6 +54,10 @@
   For more information, see the full description at the top of the tobiiLive file.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## About Hand Tracking
+
+More information and instructions regarding the hand tracking part of this project can be found in the README file in the hand_tracking folder.
 
 ### Built With
 
