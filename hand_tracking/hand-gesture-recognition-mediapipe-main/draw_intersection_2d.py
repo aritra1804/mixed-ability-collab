@@ -86,7 +86,7 @@ def convert_3d_to_2d(val,axis):
     """
     if axis == 'x':
         # Add 258.5 to the X values because the range of X values is [-258.5, 258.5]
-        return (val + 258.5) * 1920 / 517
+        return 1920 - ((val + 258.5) * 1920 / 517)
     elif axis == 'y':
         # flip y values because azure kinect's y axis increases as you go down
         return (max_y-val) * 1200 / max_y
