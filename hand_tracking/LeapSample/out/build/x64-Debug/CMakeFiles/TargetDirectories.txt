@@ -1,0 +1,9 @@
+C:/Users/verol/OneDrive/Desktop/LeapSample/out/build/x64-Debug/CMakeFiles/leapc_example.dir
+C:/Users/verol/OneDrive/Desktop/LeapSample/out/build/x64-Debug/CMakeFiles/libExampleConnection.dir
+C:/Users/verol/OneDrive/Desktop/LeapSample/out/build/x64-Debug/CMakeFiles/CallbackSample.dir
+C:/Users/verol/OneDrive/Desktop/LeapSample/out/build/x64-Debug/CMakeFiles/ImageSample.dir
+C:/Users/verol/OneDrive/Desktop/LeapSample/out/build/x64-Debug/CMakeFiles/PollingSample.dir
+C:/Users/verol/OneDrive/Desktop/LeapSample/out/build/x64-Debug/CMakeFiles/InterpolationSample.dir
+C:/Users/verol/OneDrive/Desktop/LeapSample/out/build/x64-Debug/CMakeFiles/MultiDeviceSample.dir
+C:/Users/verol/OneDrive/Desktop/LeapSample/out/build/x64-Debug/CMakeFiles/edit_cache.dir
+C:/Users/verol/OneDrive/Desktop/LeapSample/out/build/x64-Debug/CMakeFiles/rebuild_cache.dir

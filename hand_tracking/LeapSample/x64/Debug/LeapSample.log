@@ -1,0 +1,4 @@
+﻿  CallbackSample.c
+C:\Users\verol\OneDrive\Desktop\LeapSample\CallbackSample.c(65,20): warning C4101: 'pinky': unreferenced local variable
+C:\Users\verol\OneDrive\Desktop\LeapSample\CallbackSample.c(102,25): warning C4101: 'intermediatePosition': unreferenced local variable
+  LeapSample.vcxproj -> C:\Users\verol\OneDrive\Desktop\LeapSample\x64\Debug\LeapSample.exe

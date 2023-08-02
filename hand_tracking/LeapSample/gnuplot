@@ -1,0 +1,18 @@
+set title 'Real-Time Plot'
+set yrange [0:10]
+set xlabel 'Time'
+set ylabel 'Value'
+set xdata time
+set timefmt 'H:M:'
+set format x 'H:M:'
+plot 'data.txt' using 1:2 with lines
+replot
+replot
+replot
+replot
+replot
+replot
+replot
+replot
+replot
+replot
