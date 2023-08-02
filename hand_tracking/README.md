@@ -32,7 +32,7 @@ This project is built and tested using the following hardware:
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-### Why so many SDKs and 2 tracking systems??!
+### Why use so many SDKs and 2 tracking systems?
 We are using both MediaPipe and Azure Kinect to track hands for the following reasons:
 
 * MediaPipe provides real-time location of all phalanges of our hands, but the x, y coordinates are in pixels, and the z coordinate represents the landmark depth, with the depth at the wrist being the origin. For more info on the coordinate system of MediaPipe, see the "Landmarks" section in [MediaPipe Gesture Recognizer](https://developers.google.com/mediapipe/solutions/vision/gesture_recognizer/python).
