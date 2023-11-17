@@ -56,17 +56,18 @@ namespace WpfApp
                 ellipse = new Ellipse();
                 ellipse.Width = 10;
                 ellipse.Height = 10;
-                ellipse.Fill = Brushes.Blue;
+                ellipse.Fill = Brushes.Orange;
                 canvas.Children.Add(ellipse);
             }
-            this.UpdateLayout();
+            Canvas.SetLeft(ellipse, 960);
+            Canvas.SetTop(ellipse, 600);
             Thread.Sleep(1000);
             double oldX = X;
             double oldY = Y;
             // Start listening to gaze data.
             eyeTracker.GazeDataReceived += EyeTracker_GazeDataReceived;
+            
             // Wait for some data to be received.
-
             _ = Task.Run(() =>
             {
                 while (true)
@@ -91,6 +92,7 @@ namespace WpfApp
             // Stop listening to gaze data.
             eyeTracker.GazeDataReceived -= EyeTracker_GazeDataReceived;
             Trace.WriteLine("Stopped!");
+            Close();
         }
 
         private static void EyeTracker_GazeDataReceived(object sender, GazeDataEventArgs e)

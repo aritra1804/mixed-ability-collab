@@ -5,13 +5,16 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="800" Width="1200">
     <Canvas Name="canvas">
         <TextBlock Name="title" HorizontalAlignment="Center" TextWrapping="Wrap" Canvas.Top="10" Canvas.Left="20" Text="GRACE Project - Eyetracker Test" VerticalAlignment="Center" FontSize="30"/>
         <Button Content="Connect" HorizontalAlignment="Left" Canvas.Left="10" Canvas.Bottom="10" VerticalAlignment="Center" Width="60" Click="Connect_Click"/>
         <Button Content="Start" HorizontalAlignment="Left" Canvas.Left="110" Canvas.Bottom="10" VerticalAlignment="Center" Width="60" Click="Start_Click"/>
         <Button Content="Stop" HorizontalAlignment="Left" Canvas.Left="210" Canvas.Bottom="10" VerticalAlignment="Center" Width="60" Click="Stop_Click"/>
         <TextBlock Name ="textReminder" HorizontalAlignment="Center" Canvas.Top="80" Canvas.Left="30" Grid.Row="1" TextWrapping="Wrap" FontSize="18"  Text="Please make sure the eyetracker is calibrated before starting!" VerticalAlignment="Top" Width="580"/>
+        <Rectangle Canvas.Left="40" Stroke="Black" Canvas.Top="145" Width="40" Fill="#FF0012A9" Height="20"/>
+        <Ellipse Height="30" Canvas.Left="543" Stroke="Black" Canvas.Top="331" Width="30" Fill="#FFEF0000"/>
+        <Label Content="A" Canvas.Left="972" Canvas.Top="517" BorderBrush="Black" FontWeight="Bold" FontSize="18" Foreground="#FF00FF1B"/>
     </Canvas>
 
 </Window>
