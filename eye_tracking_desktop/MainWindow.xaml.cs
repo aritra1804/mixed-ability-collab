@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -15,6 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Tobii.Research;
+using System.Collections;
 
 namespace WpfApp
 {
@@ -25,8 +27,12 @@ namespace WpfApp
     {
         IEyeTracker eyeTracker = null;
         static Ellipse ellipse = null;
-        static double X = 0.5;
-        static double Y = 0.5;
+        static Ellipse ellipseCentroid = null;
+        ConcurrentQueue<Point> queue = new ConcurrentQueue<Point>();
+
+        List<Point> buffer = new List<Point>();
+        Point centroid;
+        Point bufferCentroid;
 
         public MainWindow()
         {
@@ -40,17 +46,13 @@ namespace WpfApp
             {
                 throw new NullReferenceException("No eyetracker found!");
             }
-            title.Visibility= Visibility.Collapsed;
+            title.Visibility = Visibility.Collapsed;
             textReminder.Visibility = Visibility.Collapsed;
-        }
-
-        private void Calibrate_Click(object sender, RoutedEventArgs e)
-        {
-
         }
 
         private void Start_Click(object sender, RoutedEventArgs e)
         {
+            // Initializes the ellipse
             if (ellipse == null)
             {
                 ellipse = new Ellipse();
@@ -59,29 +61,97 @@ namespace WpfApp
                 ellipse.Fill = Brushes.Blue;
                 canvas.Children.Add(ellipse);
             }
+
+            if (ellipseCentroid == null)
+            {
+                ellipseCentroid = new Ellipse();
+                ellipseCentroid.Width = 70;
+                ellipseCentroid.Height = 70;
+                ellipseCentroid.Fill = Brushes.Green;
+                canvas.Children.Add(ellipseCentroid);
+            }
             this.UpdateLayout();
             Thread.Sleep(1000);
-            double oldX = X;
-            double oldY = Y;
+
             // Start listening to gaze data.
             eyeTracker.GazeDataReceived += EyeTracker_GazeDataReceived;
             // Wait for some data to be received.
 
             _ = Task.Run(() =>
             {
+                if (ellipse == null)
+                {
+                    ellipse = new Ellipse();
+                    ellipse.Width = 10;
+                    ellipse.Height = 10;
+                    ellipse.Fill = Brushes.Blue;
+                    canvas.Children.Add(ellipse);
+                }
+
+                if (ellipseCentroid == null)
+                {
+                    ellipseCentroid = new Ellipse();
+                    ellipseCentroid.Width = 70;
+                    ellipseCentroid.Height = 70;
+                    ellipseCentroid.Fill = Brushes.Green;
+                    canvas.Children.Add(ellipseCentroid);
+                }
                 while (true)
                 {
-                    if (oldX != X || oldY != Y)
+                    if (!queue.IsEmpty)
                     {
-                        oldX = X;
-                        oldY = Y;
-                        this.Dispatcher.Invoke(() =>
+                        bool removed = queue.TryDequeue(out Point p);
+                        if (removed)
                         {
-                            Canvas.SetLeft(ellipse, X * 1920);
-                            Canvas.SetTop(ellipse, Y * 1200);
-                        });
-                    }
+                            this.Dispatcher.Invoke(() =>
+                            {
+                                Canvas.SetLeft(ellipse, p.getX() * 1920);
+                                Canvas.SetTop(ellipse, p.getY() * 1200);
+                            });
 
+                            if (centroid == null || !isNear(p, centroid))
+                            {
+                                if (bufferCentroid != null && !isNear(bufferCentroid, p))
+                                {
+                                    buffer.Clear();
+                                    bufferCentroid = null;
+                                }
+
+                                if (bufferCentroid == null)
+                                {
+                                    bufferCentroid = p;
+                                }
+                                else
+                                {
+                                    double bufferCentroidX = (bufferCentroid.getX() * buffer.Count + p.getX()) / (buffer.Count + 1);
+                                    double bufferCentroidY = (bufferCentroid.getY() * buffer.Count + p.getY()) / (buffer.Count + 1);
+                                    bufferCentroid = new Point(bufferCentroidX, bufferCentroidY);
+                                }
+                                buffer.Add(p);
+
+                                if (buffer.Count >= 10)
+                                {
+                                    centroid = bufferCentroid;
+
+                                    this.Dispatcher.Invoke(() =>
+                                    {
+                                        Canvas.SetLeft(ellipseCentroid, centroid.getX() * 1920);
+                                        Canvas.SetTop(ellipseCentroid, centroid.getY() * 1200);
+                                    });
+
+                                    buffer.Clear();
+                                    bufferCentroid = null;
+                                }
+
+                                else
+                                {
+                                    //ellipseCentroid.Height += 1;
+                                    //ellipseCentroid.Width += 1;
+                                }
+                            }
+
+                        }
+                    }
                 }
             });
         }
@@ -93,20 +163,29 @@ namespace WpfApp
             Trace.WriteLine("Stopped!");
         }
 
-        private static void EyeTracker_GazeDataReceived(object sender, GazeDataEventArgs e)
+        private void EyeTracker_GazeDataReceived(object sender, GazeDataEventArgs e)
         {
 
             if (e.LeftEye.GazePoint.Validity == Validity.Valid)
             {
                 Trace.Write("L: (" + e.LeftEye.GazePoint.PositionOnDisplayArea.X + ", " + e.LeftEye.GazePoint.PositionOnDisplayArea.Y + ")");
-                X = e.LeftEye.GazePoint.PositionOnDisplayArea.X;
-                Y = e.LeftEye.GazePoint.PositionOnDisplayArea.Y;
+
+                double x = e.LeftEye.GazePoint.PositionOnDisplayArea.X;
+                double y = e.LeftEye.GazePoint.PositionOnDisplayArea.Y;
+                Point p = new Point(x, y);
+
+                queue.Enqueue(p);
             }
 
             if (e.RightEye.GazePoint.Validity == Validity.Valid)
             {
                 Trace.WriteLine("R: (" + e.RightEye.GazePoint.PositionOnDisplayArea.X + ", " + e.RightEye.GazePoint.PositionOnDisplayArea.Y + ")");
             }
+        }
+
+        private bool isNear(Point a, Point b)
+        {
+            return Math.Sqrt((a.getX() - b.getX()) * (a.getX() - b.getX()) + (a.getY() - b.getY()) * (a.getY() - b.getY())) < 0.05;
         }
     }
 }
