@@ -26,8 +26,6 @@ namespace WpfApp
     public partial class MainWindow : Window
     {
         IEyeTracker eyeTracker = null;
-        static Ellipse ellipse = null;
-        static Ellipse ellipseCentroid = null;
         ConcurrentQueue<Point> queue = new ConcurrentQueue<Point>();
 
         List<Point> buffer = new List<Point>();
@@ -52,50 +50,33 @@ namespace WpfApp
 
         private void Start_Click(object sender, RoutedEventArgs e)
         {
-            // Initializes the ellipse
-            if (ellipse == null)
-            {
-                ellipse = new Ellipse();
-                ellipse.Width = 10;
-                ellipse.Height = 10;
-                ellipse.Fill = Brushes.Blue;
-                canvas.Children.Add(ellipse);
-            }
-
-            if (ellipseCentroid == null)
-            {
-                ellipseCentroid = new Ellipse();
-                ellipseCentroid.Width = 70;
-                ellipseCentroid.Height = 70;
-                ellipseCentroid.Fill = Brushes.Green;
-                canvas.Children.Add(ellipseCentroid);
-            }
-            this.UpdateLayout();
-            Thread.Sleep(1000);
-
             // Start listening to gaze data.
             eyeTracker.GazeDataReceived += EyeTracker_GazeDataReceived;
             // Wait for some data to be received.
 
             _ = Task.Run(() =>
             {
-                if (ellipse == null)
-                {
-                    ellipse = new Ellipse();
-                    ellipse.Width = 10;
-                    ellipse.Height = 10;
-                    ellipse.Fill = Brushes.Blue;
-                    canvas.Children.Add(ellipse);
-                }
+                Ellipse ellipse = null;
+                Ellipse ellipseCentroid = null;
+                Dispatcher.Invoke((Action)delegate {
+                    if (ellipse == null)
+                    {
+                        ellipse = new Ellipse();
+                        ellipse.Width = 10;
+                        ellipse.Height = 10;
+                        ellipse.Fill = Brushes.Blue;
+                        canvas.Children.Add(ellipse);
+                    }
 
-                if (ellipseCentroid == null)
-                {
-                    ellipseCentroid = new Ellipse();
-                    ellipseCentroid.Width = 70;
-                    ellipseCentroid.Height = 70;
-                    ellipseCentroid.Fill = Brushes.Green;
-                    canvas.Children.Add(ellipseCentroid);
-                }
+                    if (ellipseCentroid == null)
+                    {
+                        ellipseCentroid = new Ellipse();
+                        ellipseCentroid.Width = 70;
+                        ellipseCentroid.Height = 70;
+                        ellipseCentroid.Fill = Brushes.Green;
+                        canvas.Children.Add(ellipseCentroid);
+                    }
+                });
                 while (true)
                 {
                     if (!queue.IsEmpty)
@@ -135,14 +116,15 @@ namespace WpfApp
 
                                     this.Dispatcher.Invoke(() =>
                                     {
-                                        Canvas.SetLeft(ellipseCentroid, centroid.getX() * 1920);
-                                        Canvas.SetTop(ellipseCentroid, centroid.getY() * 1200);
+                                        Canvas.SetLeft(ellipseCentroid, centroid.getX() * 1920 - 35);
+                                        Canvas.SetTop(ellipseCentroid, centroid.getY() * 1200 - 35);
                                     });
 
                                     buffer.Clear();
                                     bufferCentroid = null;
                                 }
 
+                                // I wanted to increase the size of centroid ellipse, but it complains another thread owns it.
                                 else
                                 {
                                     //ellipseCentroid.Height += 1;
