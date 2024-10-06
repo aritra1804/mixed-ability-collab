@@ -27,7 +27,7 @@ This code generates calibration images using the pygame package.
 
 """
 
-import tobii_research as tr
+import tobii_research as tr # conda eyetracking created with python3.6 not able to install transformers, conda env eye created with python=3.10 and transformers installed
 import time
 from screeninfo import get_monitors
 import csv
@@ -48,7 +48,13 @@ import http.server
 import json
 import requests
 from flask import Flask, render_template, jsonify
-
+import threading
+import asyncio
+import websockets
+import os
+import base64
+from image_to_text import caption_image
+from PIL import Image,UnidentifiedImageError
 # Set the angle filter amount for the I-VT filter in the filter_centroids fn
 # Check if command-line argument exists
 if len(sys.argv) > 1:
@@ -186,7 +192,9 @@ def gaze_data_callback(gaze_data):
     global centroid_data, retriever, data_to_send
     #append the gaze data to the list
     gaze_data_list.append(append_pixel_data(gaze_data))
+    
     #check if interpolation needs to happen for this data point
+    #print("gaze data:",gaze_data.get('left_gaze_point_on_display_area'),gaze_data.get('right_gaze_point_on_display_area'))
     check_interpolation(gaze_data)
     angle_velocity_deque.append(gaze_data)
     if(len(angle_velocity_deque) > av_deque_maxlen):
@@ -695,7 +703,55 @@ def check_in_bounds(x, y):
         if is_within_boundary(x, y, aoi):
             #print(x, y)
             print(name)
-            return name
+            return name, aoi
+        
+
+#  returns the AOI coordinates based on a series of x and y data, two std long for each axis 
+def calculate_aoi(x_data, y_data, std_dev=2):
+
+    mean_x, mean_y = np.mean(x_data), np.mean(y_data)
+    std_x, std_y = np.std(x_data), np.std(y_data)
+
+    aoi_x_min = mean_x - std_dev * std_x
+    aoi_x_max = mean_x + std_dev * std_x
+    aoi_y_min = mean_y - std_dev * std_y
+    aoi_y_max = mean_y + std_dev * std_y
+    
+    return {
+        "x_min": aoi_x_min,
+        "x_max": aoi_x_max,
+        "y_min": aoi_y_min,
+        "y_max": aoi_y_max
+        }
+
+        
+def extend_and_crop_image(image_path, aoi_coordinates):
+   
+
+    img = mpimg.imread(image_path)
+    
+    img_height, img_width, _ = img.shape
+    
+    # #Create a new figure for the full screen size and plot the image using 'extent'
+    # fig, ax = plt.subplots(figsize=(screen_width / 100, screen_height / 100))  # Adjust size for screen resolution
+    # ax.imshow(img, extent=[0, screen_width, 0, screen_height])
+    
+    # # Save the extended image from the figure into a NumPy array
+    # ax.axis('off') 
+    # fig.canvas.draw() 
+    # extended_image = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
+    # extended_image = extended_image.reshape(fig.canvas.get_width_height()[::-1] + (3,))
+    
+    # plt.close(fig)  
+    
+    x_min, y_min, x_max, y_max = [int(val) for val in aoi_coordinates]
+
+    # Crop the extended image: extended_image[y_min:y_max, x_min:x_max]
+    cropped_img = img[y_min:y_max, x_min:x_max]
+
+    return cropped_img
+
+
 
 def serv():
     '''# Set up the server
@@ -783,7 +839,9 @@ def serv3():
     print('res', res.text)
 
 def serv4():
+    
     data_to_send = {"x": 500, "y": 500}
+   
     app = Flask(__name__)
 
     # Route to serve the webpage
@@ -799,6 +857,134 @@ def serv4():
     if __name__ == '__main__':
         app.run(debug=True, threaded=True)
 
+received_container_data = []
+
+# WebSocket server function that sends real-time eye-tracking data to web.html and receive "w3-container" id, not generalizable to other html structures
+async def websocket_server(websocket, path):
+    global data_to_send 
+    while True:
+        try:
+            #send 
+            await websocket.send(f"{data_to_send}")   
+
+            #receive
+            message = await websocket.recv()  
+            data = json.loads(message)
+           
+            container_id = data.get('container_id')
+            if container_id:
+                received_container_data.append(container_id)
+                print(f"WebSocket Server: Received container ID: {container_id}")
+                
+            await asyncio.sleep(1)  # Send updates every 1 second
+        except websockets.ConnectionClosed:
+            print("Client disconnected")
+            break
+
+
+SAVE_DIR = 'screenshots'
+os.makedirs(SAVE_DIR, exist_ok=True)
+
+# save html screenshot
+def save_screenshot(image_data, filename):
+
+    image_data = image_data.split(",")[1]
+    image_bytes = base64.b64decode(image_data)
+    with open(os.path.join(SAVE_DIR, filename), "wb") as f:
+        f.write(image_bytes)
+
+
+# receive web.html screenshot
+async def receive_messages(websocket):
+    i = 1
+    while True:
+        try:       
+            message = await websocket.recv()
+            data = json.loads(message)
+
+            if 'screenshot' in data:
+                print("Screenshot received")
+                save_screenshot(data['screenshot'], f"screenshot_{i}.png")
+                print(f"Screenshot saved as screenshot_{i}.png")
+                #caption_image(image_path= f"screenshots/screenshot_{i}.png")
+                 # Add a delay to make sure the image is fully written 
+                time.sleep(0.5)  
+
+                # Check if the image is valid 
+                try:
+                    with Image.open(os.path.join(SAVE_DIR, f"screenshot_{i}.png")) as img:
+                        img.verify() 
+
+                    caption_image(image_path=os.path.join(SAVE_DIR, f"screenshot_{i}.png"))
+                except (UnidentifiedImageError, FileNotFoundError) as e:
+                    print(f"Error opening image screenshot_{i}.png: {e}")
+
+                
+                i = i + 1
+
+        except websockets.ConnectionClosed:
+            print("Client disconnected")
+            break
+
+# collect data for 10 seconds and send AOI to web.html
+async def websocket_server_aoi(websocket):
+    global data_to_send
+    collected_gaze_data = []
+
+    start_time = time.time()
+    while True:
+        try:
+            current_time = time.time()
+
+            if current_time - start_time < 10: # change if want to collect data for a different range of time
+                collected_gaze_data.append((data_to_send["x"], data_to_send["y"]))
+                print(f"Collected: {data_to_send}")
+                # seems not working here so created receive_messages
+                # message = await websocket.recv()
+                # data = json.loads(message)
+
+                # if 'screenshot' in data:
+                #     # Save the screenshot received from the client
+                #     print("Screenshot received")
+                #     save_screenshot(data['screenshot'], "screenshot.png")
+                #     print("Screenshot saved as screenshot.png")
+                await asyncio.sleep(1)  # Sleep for 1 second (same rate as updates)
+            else:
+                x_data = [point[0] for point in collected_gaze_data]
+                y_data = [point[1] for point in collected_gaze_data]
+
+                aoi_result = calculate_aoi(x_data, y_data)
+
+                await websocket.send(json.dumps(aoi_result))
+                print("Sent AOI result to client:", aoi_result)
+
+                # reset timer every 10 seconds
+                start_time = time.time()
+                collected_gaze_data = []
+            
+        except websockets.ConnectionClosed:
+            print("Client disconnected")
+            break
+
+
+# runs both send and receive aoi
+async def websocket_handler(websocket, path):
+    await asyncio.gather(
+        websocket_server_aoi(websocket),
+        receive_messages(websocket)
+    )
+
+# start the WebSocket server on localhost 9000, check if socket is listening on 9000 by netstat -aon |findstr 9000 check if there are things on  a port
+
+def start_websocket_server():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    start_server = websockets.serve(websocket_handler, "localhost", 9000)
+    print("server started")
+    loop.run_until_complete(start_server)
+    loop.run_forever()
+
+
 def run_plots_csv():
     global centroid_data, left_x, left_y, right_x, right_y, inter_x, inter_y
     left_x = [gaze_data['left_gaze_point_on_display_area'][0] for gaze_data in gaze_data_list]
@@ -809,6 +995,7 @@ def run_plots_csv():
     inter_y = [gaze_data['inter_gaze_point_on_display_area'][1] for gaze_data in gaze_data_list if 'inter_gaze_point_on_display_area' in gaze_data]
     left_y, right_y, inter_y = flip_y(left_y), flip_y(right_y), flip_y(inter_y)
     draw_unfiltered('Unfiltered', 'images/test.png')
+    # C:\Users\erynm\Downloads\mixed-ability-collab\eye_tracking\Tobii\images\test.png
     for value in centroid_data:
         coords_x, coords_y = value.coords()
         centroids_x.append(coords_x)
@@ -821,20 +1008,24 @@ def run_plots_csv():
     #left_y, right_y, inter_y = flip_y(left_y), flip_y(right_y), flip_y(inter_y)
     #draw_unfiltered('Unfiltered', 'images/test.png')
 
-run_eyetracker(5)
-#thread1 = threading.Thread(target=serv4)
-#thread2 = threading.Thread(target=run_eyetracker(5))
+# run_eyetracker(5)
+# thread1 = threading.Thread(target=serv4)
+#start_websocket_server()
+thread1 = threading.Thread(target=start_websocket_server)
+#thread2 = threading.Thread(target=run_eyetracker(50))
 
-# Start the threads
-#thread1.start()
+# # Start the threads
+thread1.start()
 #thread2.start()
+print("gonna start eye tracker")
+run_eyetracker(50)
 
-# Wait for both threads to finish
-#thread1.join()
-#thread2.join()
+# # Wait for both threads to finish
+# thread1.join()
+# thread2.join()
 
-#print("Both functions have completed.")
-#run_plots_csv()
+print("Both functions have completed.")
+run_plots_csv()
 #Instructions for running in a local server:
 #1. Open a terminal and start a local server using the command "python -m http.server"
 #2. Open a second terminal and run this file

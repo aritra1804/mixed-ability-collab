@@ -3,7 +3,7 @@ from pywinauto import Desktop, Application
 from pywinauto.findwindows import ElementNotFoundError
 import pygetwindow as gw
 import sys
-import win32gui
+import win32gui #not able to install with python=3.10 but seems its not called
 
 coordsx = 200
 coordsy = 200

@@ -2,6 +2,8 @@
 <html>
 <head>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
 <title>W3.CSS Template</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -12,7 +14,7 @@
 <style>
 html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif}
 </style>
-<script>
+<!-- <script>
   // JavaScript code to fetch data from the server and process the response
   function getData() {
     fetch('/data')
@@ -53,7 +55,86 @@ html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif}
     document.body.appendChild(borderElement);
   }
 
+</script> -->
+
+<script>
+  document.addEventListener('DOMContentLoaded', (event) => {
+    // Connect to the WebSocket server
+    const socket = new WebSocket("ws://localhost:9000/");
+
+    // When WebSocket connection is open
+    socket.onopen = function(event) {
+      console.log("Connected to WebSocket server");
+    };
+
+    // // recieve real time gaze data and send container id 
+    // socket.onmessage = function(event) {
+    //   const data = JSON.parse(event.data.replace(/'/g, '"')); // Convert string to JSON
+    //   console.log("Real-Time Data:", data);
+    //   const x = data.x
+    //   const y = data.y
+      
+    //   // Check if the (x, y) is within a 'w3-container' div class 
+    //   const containers = document.querySelectorAll('.w3-container');
+    //   let foundContainerId = null;
+      
+    //   // call at thebeginning, save computation?
+    //   containers.forEach(container => {
+    //     const rect = container.getBoundingClientRect();
+    //     if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+    //       foundContainerId = container.id; // Get the ID of the container
+    //     }
+    //   });
+
+    //   // If found, send the ID, otherwise "none"
+    //   const containerIdToSend = foundContainerId ? foundContainerId : "none";
+    //   socket.send(JSON.stringify({ container_id: containerIdToSend }));
+
+    // };
+
+    // receive aoi and return screenshots
+    socket.onmessage = function(event) { 
+      // receive aoi
+      let aoiData = JSON.parse(event.data); 
+      console.log("Received AOI data from server:", aoiData); 
+      
+      // Capture screenshot based on aoi
+      captureScreenshot(aoiData);
+
+    };
+    
+    function captureScreenshot(aoi) {
+      html2canvas(document.body).then(function(canvas) {
+          // Create a canvas context
+          let ctx = canvas.getContext("2d");
+
+          let width = aoi.x_max - aoi.x_min;
+          let height = aoi.y_max - aoi.y_min;
+
+          // Create a new canvas to extract aoi
+          let aoiCanvas = document.createElement("canvas");
+          aoiCanvas.width = width;
+          aoiCanvas.height = height;
+          let aoiCtx = aoiCanvas.getContext("2d");
+
+          // Draw the aoi from the old canvas into the new canvas
+          aoiCtx.drawImage(canvas, aoi.x_min, aoi.y_min, width, height, 0, 0, width, height);
+
+          // Convert aoi canvas to a data URL (base64)
+          let imageData = aoiCanvas.toDataURL("image/png");
+
+          socket.send(JSON.stringify({ screenshot: imageData }));
+          console.log("Screenshot sent to server");
+      });
+  }
+
+
+    socket.onerror = function(error) {
+      console.log("WebSocket Error: ", error);
+    };
+  });
 </script>
+
 </head>
 <body class="w3-light-grey">
 
@@ -114,26 +195,26 @@ html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif}
     
       <div class="w3-container w3-card w3-white w3-margin-bottom">
         <h2 class="w3-text-grey w3-padding-16"><i class="fa fa-suitcase fa-fw w3-margin-right w3-xxlarge w3-text-teal"></i>Work Experience</h2>
-        <div class="w3-container">
+        <div class="w3-container" id="left">
           <h5 class="w3-opacity"><b>Front End Developer / w3schools.com</b></h5>
           <h6 class="w3-text-teal"><i class="fa fa-calendar fa-fw w3-margin-right"></i>Jan 2015 - <span class="w3-tag w3-teal w3-round">Current</span></h6>
           <p>Lorem ipsum dolor sit amet. Praesentium magnam consectetur vel in deserunt aspernatur est reprehenderit sunt hic. Nulla tempora soluta ea et odio, unde doloremque repellendus iure, iste.</p>
           <hr>
         </div>
-        <div class="w3-container">
+        <div class="w3-container" id="right-one">
           <h5 class="w3-opacity"><b>Web Developer / something.com</b></h5>
           <h6 class="w3-text-teal"><i class="fa fa-calendar fa-fw w3-margin-right"></i>Mar 2012 - Dec 2014</h6>
           <p>Consectetur adipisicing elit. Praesentium magnam consectetur vel in deserunt aspernatur est reprehenderit sunt hic. Nulla tempora soluta ea et odio, unde doloremque repellendus iure, iste.</p>
           <hr>
         </div>
-        <div class="w3-container">
+        <div class="w3-container" id="right-two">
           <h5 class="w3-opacity"><b>Graphic Designer / designsomething.com</b></h5>
           <h6 class="w3-text-teal"><i class="fa fa-calendar fa-fw w3-margin-right"></i>Jun 2010 - Mar 2012</h6>
           <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. </p><br>
         </div>
       </div>
 
-      <div class="w3-container w3-card w3-white">
+      <div class="w3-container w3-card w3-white" id="right-three">
         <h2 class="w3-text-grey w3-padding-16"><i class="fa fa-certificate fa-fw w3-margin-right w3-xxlarge w3-text-teal"></i>Education</h2>
          <div class="w3-container">
           <h5 class="w3-opacity"><b>School of Coding</b></h5>
