@@ -25,6 +25,25 @@ These were used for testing purposes and can be used to visualize the data and t
 Calibration code modified from the Tobii Pro SDK sample code at https://developer.tobiipro.com/python/python-sdk-reference-guide.html
 This code generates calibration images using the pygame package.
 
+
+
+"""
+
+"""
+some observations: 
+
+conda env (eye) and python version 3.10 and (eyetracking) and python verison 3.6 work 
+
+the code uses device time (eye tracker time which starts from 1970) but uses system time (computer time) in find_points_in_window and gaze_angle_velocity because only relative times matter
+suspect device time is mainly used to avoid issues like latency, need further consideration when syncing different systems
+it is noted that the time used by python is in UTC, which is four hours ahead of EST 
+the device time and system time are in seconds * 1000_000 unix time, and the time-offset might change 
+
+device time in centroids.csv
+
+remember to close all the plots for the process to end 
+
+the test image is 1920 * 1200, same for monitor width (1920) to monitor height 
 """
 
 import tobii_research as tr # conda eyetracking created with python3.6 not able to install transformers, conda env eye created with python=3.10 and transformers installed
@@ -55,6 +74,7 @@ import os
 import base64
 from image_to_text import caption_image
 from PIL import Image,UnidentifiedImageError
+from datetime import datetime
 # Set the angle filter amount for the I-VT filter in the filter_centroids fn
 # Check if command-line argument exists
 if len(sys.argv) > 1:
@@ -72,9 +92,11 @@ FREQUENCY = 250 #Hz
 #get screen resolution
 monitor = get_monitors()[0]
 width = monitor.width
+print("monitor width",width)
 height = monitor.height
+print("monitor height",height)
 
-# I-VT filter parameters, ADJUST AS NEEDED
+# I-VT filter parameters, ADJUST AS NEEDED paper
 velocity_threshold = 30                     # maximum angle to be considered a fixation, default 30 degrees
 maximum_interpolation_time_micro = 75000    # maximum allowed time for interpolation in microseconds
 maximum_time_between_fixations = 75000      # maximumm allowed time between fixations in microseconds
@@ -90,6 +112,7 @@ angle_velocity_deque, centroid_data, centroid_ids, prev_centroid = deque(), [], 
 av_deque_maxlen = math.floor(FREQUENCY * window_size_seconds * 2)
 retriever = DomObjectRetriever()
 data_to_send = {"x": height, "y": width}
+new_system_time = []
 
 #Switch based on the dominant eye of the participant
 dominant_eye = 'left'
@@ -111,6 +134,8 @@ inter_gova = 'inter_gaze_origin_validity'
 inter_gotcs = 'inter_gaze_origin_in_trackbox_coordinate_system'
 inter_goucs = 'inter_gaze_origin_in_user_coordinate_system'
 
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #This function completes basic linear interpolation for 2 and 3-variable arrays
 def linear_interpolation(indices, criteria):
     global gaze_data_list, prev_valid_time
@@ -163,7 +188,7 @@ def interpolate_gaze_data(start, current):
             i+=1
             #print('live interpolation at index ' + str(x), gaze_data_list[x][inter_poda])
 
-#This function checks if interpolation needs to occur, if so it calls the interpolation function
+#This function checks if interpolation needs to occur, identified by NaN in output.csv and below maximum threshold, if so it calls the interpolation function - linear_interpolation
 def check_interpolation(gaze_data):
     global prev_valid_point, prev_valid_time, prev_valid_idx, flag_interpolation, gaze_data_list
     # Interpolation works as follows: maintain an index of the last valid data point.
@@ -186,12 +211,15 @@ def check_interpolation(gaze_data):
         prev_valid_point = gaze_data
         prev_valid_time = timestamp
         prev_valid_idx = gaze_data['index']
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #This callback function adds gaze data from the eye tracker to the global gaze_data_list and interpolates the data live
 def gaze_data_callback(gaze_data):
     global centroid_data, retriever, data_to_send
     #append the gaze data to the list
     gaze_data_list.append(append_pixel_data(gaze_data))
+    new_system_time.append(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     
     #check if interpolation needs to happen for this data point
     #print("gaze data:",gaze_data.get('left_gaze_point_on_display_area'),gaze_data.get('right_gaze_point_on_display_area'))
@@ -458,16 +486,18 @@ def filter_centroids(unfiltered_centroids):
 #This function writes data to a csv file. Additional data column header values should be added to headers/headers2.extend as necessary
 def write_to_csv(data_to_write, centroid_data):
     #main data csv
-    headers = list(data_to_write[0].keys())
+    headers = ['new_timestamps'] +  list(data_to_write[0].keys())
     headers.extend(['angular_distance', 'velocity', 'window_1', 'window_2', 'inter_gaze_point_on_display_area', 'inter_gaze_origin_validity', 'inter_gaze_origin_in_trackbox_coordinate_system', 'inter_gaze_origin_in_user_coordinate_system'])
-    with open('output.csv', 'w', newline = '') as file:
+    with open('csv/output/output.csv', 'w', newline = '') as file:
         writer = csv.DictWriter(file, fieldnames=headers)
         writer.writeheader()
-        writer.writerows(data_to_write)
+        for row, timestamp in zip(data_to_write,new_system_time):
+            row = {"new_timestamps":timestamp,**row}
+            writer.writerow(row)
     
     #centroid csv
     headers2 = ['id', 'start', 'end', 'x_avg', 'y_avg', 'x_list', 'y_list', 'origin']
-    with open('centroids.csv', 'w', newline='') as file2:
+    with open('csv/centroid/centroids.csv', 'w', newline='') as file2:
         writer = csv.DictWriter(file2, fieldnames=headers2)
         writer.writeheader()
         for centroid in centroid_data:
@@ -493,7 +523,7 @@ def draw_unfiltered(title, image_path):
     fig, ax = plt.subplots()
     ax.imshow(img, extent=[0, width, 0, height])
     
-    # Plot the new scatter plot with the updated data
+    # Plot the new scatter plot with the updated data, left eye in blue, righ eye in red, and interpolated in green
     plt.scatter(left_x, left_y, facecolor = 'none', edgecolor = 'blue', label = 'Left Eye')
     plt.scatter(right_x, right_y, facecolor = 'none', edgecolor = 'red', label = 'Right Eye')
     plt.scatter(inter_x, inter_y, facecolor = 'none', edgecolor = 'green', label = "Interpolated")
@@ -634,7 +664,7 @@ def plot_trackbox_data(interpolated_data, title, origin, origin2):
     ax.legend()
     plt.show()
 
-#flips the directionality of a set of coordinates
+#flips the directionality of a set of coordinates, this is done to match screen coordinates, whose y increases as you move down the screen and the matplotlib, whose y decreases as you move down 
 def flip_y(cen_y):
     newList = []
     for y in cen_y:
@@ -1011,14 +1041,17 @@ def run_plots_csv():
 # run_eyetracker(5)
 # thread1 = threading.Thread(target=serv4)
 #start_websocket_server()
-thread1 = threading.Thread(target=start_websocket_server)
+
 #thread2 = threading.Thread(target=run_eyetracker(50))
 
 # # Start the threads
-thread1.start()
+# thread1 = threading.Thread(target=start_websocket_server) #comment out these two lines only
+# thread1.start()
 #thread2.start()
 print("gonna start eye tracker")
-run_eyetracker(50)
+print("start time",int(time.time()))
+run_eyetracker(180)
+print("end time",int(time.time()))
 
 # # Wait for both threads to finish
 # thread1.join()
