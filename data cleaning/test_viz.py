@@ -2,73 +2,103 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import matplotlib.image as mpimg
-import ast
+from sklearn.preprocessing import MinMaxScaler
+import os
 
 # ======= CONFIGURATION =======
 cleaned_csv = "data cleaning/clean_csv/cleaned_amazon.csv"
+centroids_csv = "data cleaning/centroid/centroids_amazon.csv"
 screenshot_path = "data cleaning/screenshots/amazon.png"
+output_folder = "data cleaning/heatmaps"
+output_filename = "side_by_side_heatmap_amazon.png"
 # =============================
 
-# Load the gaze data
+# Create the heatmaps folder if it doesn't exist
+os.makedirs(output_folder, exist_ok=True)
+
+# Load gaze data
 gaze_data = pd.read_csv(cleaned_csv)
+centroids_data = pd.read_csv(centroids_csv)
 
-# Keep only valid left eye gaze points
-gaze_data = gaze_data[gaze_data['left_gaze_point_validity'] == 1].copy()
-
-# Extract (x, y) coordinates from left gaze point
-def extract_coordinates(coord_str):
-    try:
-        return ast.literal_eval(coord_str)
-    except (ValueError, SyntaxError):
-        return (None, None)
-
-gaze_data[['gaze_x', 'gaze_y']] = gaze_data['left_gaze_point_on_display_area'].apply(
-    lambda coord: pd.Series(extract_coordinates(coord))
-)
-
-# Drop invalid gaze points
-gaze_data = gaze_data.dropna(subset=['gaze_x', 'gaze_y'])
-
-# Load the screenshot and get its size
+# Load screenshot
 background_img = mpimg.imread(screenshot_path)
 img_height, img_width = background_img.shape[:2]
 print(f"Image size: {img_width}x{img_height}")
 
-# Scale normalized gaze coordinates to match the screenshot size
-gaze_data['gaze_x_px'] = gaze_data['gaze_x'] * img_width
-gaze_data['gaze_y_px'] = gaze_data['gaze_y'] * img_height
+# Rescale cleaned gaze data
+scaler_x = MinMaxScaler(feature_range=(0, img_width))
+scaler_y = MinMaxScaler(feature_range=(0, img_height))
 
-# Plot the screenshot as the background
-fig, ax = plt.subplots(figsize=(12, 8))
-ax.imshow(background_img, alpha=0.3)
+gaze_data['gaze_x_scaled'] = scaler_x.fit_transform(gaze_data[['gaze_x_px']])
+gaze_data['gaze_y_scaled'] = scaler_y.fit_transform(gaze_data[['gaze_y_px']])
 
-# Plot heatmap
+# Rescale centroids data
+scaler_cx = MinMaxScaler(feature_range=(0, img_width))
+scaler_cy = MinMaxScaler(feature_range=(0, img_height))
+
+centroids_data['x_avg_scaled'] = scaler_cx.fit_transform(centroids_data[['x_avg']])
+centroids_data['y_avg_scaled'] = scaler_cy.fit_transform(centroids_data[['y_avg']])
+
+# ========= PLOT SIDE-BY-SIDE =========
+fig, axes = plt.subplots(1, 2, figsize=(24, 12))
+
+# --- Cleaned gaze data heatmap ---
+axes[0].imshow(background_img, alpha=0.3)
 sns.kdeplot(
-    x=gaze_data['gaze_x_px'],
-    y=gaze_data['gaze_y_px'],
+    x=gaze_data['gaze_x_scaled'],
+    y=gaze_data['gaze_y_scaled'],
     cmap='Reds',
     fill=True,
     alpha=0.9,
     bw_adjust=0.2,
     thresh=0.01,
-    levels=100
+    levels=100,
+    ax=axes[0]
 )
-
-# Plot gaze points
-plt.scatter(
-    gaze_data['gaze_x_px'],
-    gaze_data['gaze_y_px'],
-    c='yellow',
-    s=50,
+axes[0].scatter(
+    gaze_data['gaze_x_scaled'],
+    gaze_data['gaze_y_scaled'],
+    c='blue',
+    s=20,
     alpha=0.8,
     label='Gaze Points'
 )
+axes[0].set_xlim(0, img_width)
+axes[0].set_ylim(img_height, 0)
+axes[0].set_title('Heatmap Overlay: Cleaned Amazon CSV (Raw Gaze Data)')
+axes[0].set_xlabel('X Coordinate (pixels)')
+axes[0].set_ylabel('Y Coordinate (pixels)')
+axes[0].legend()
 
-# Final plot settings
-ax.set_xlim(0, img_width)
-ax.set_ylim(img_height, 0)
-ax.set_xlabel('X Coordinate (pixels)')
-ax.set_ylabel('Y Coordinate (pixels)')
-ax.set_title('Amazon Product Page Gaze Heatmap (Left Eye Only)')
-plt.legend()
+# --- Centroids fixation heatmap ---
+axes[1].imshow(background_img, alpha=0.3)
+sns.kdeplot(
+    x=centroids_data['x_avg_scaled'],
+    y=centroids_data['y_avg_scaled'],
+    cmap='Reds',
+    fill=True,
+    alpha=0.9,
+    bw_adjust=0.2,
+    thresh=0.01,
+    levels=100,
+    ax=axes[1]
+)
+axes[1].scatter(
+    centroids_data['x_avg_scaled'],
+    centroids_data['y_avg_scaled'],
+    c='blue',
+    s=20,
+    alpha=0.8,
+    label='Fixation Centroids'
+)
+axes[1].set_xlim(0, img_width)
+axes[1].set_ylim(img_height, 0)
+axes[1].set_title('Heatmap Overlay: Centroids Amazon CSV (Fixation Clusters)')
+axes[1].set_xlabel('X Coordinate (pixels)')
+axes[1].set_ylabel('Y Coordinate (pixels)')
+axes[1].legend()
+
+plt.tight_layout()
+plt.savefig(f"{output_folder}/{output_filename}", dpi=300)
+print(f"Side-by-side heatmaps saved as '{output_folder}/{output_filename}'")
 plt.show()
