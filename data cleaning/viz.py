@@ -3,11 +3,17 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import matplotlib.image as mpimg
 from sklearn.preprocessing import MinMaxScaler
+import os
 
 # ======= CONFIGURATION =======
-cleaned_csv = "data cleaning/clean_csv/cleaned_amazon.csv"  # Path to cleaned CSV
-screenshot_path = "data cleaning/screenshots/amazon.png"        # Path to screenshot
+cleaned_csv = "data cleaning/clean_csv/cleaned_amazon.csv"
+screenshot_path = "data cleaning/screenshots/amazon.png"
+output_folder = "data cleaning/heatmaps"
+output_filename = "amazon_gaze_heatmap.png"
 # =============================
+
+# Create the heatmaps folder if it doesn't exist
+os.makedirs(output_folder, exist_ok=True)
 
 # Load the cleaned gaze data
 gaze_data = pd.read_csv(cleaned_csv)
@@ -34,8 +40,8 @@ sns.kdeplot(
     y=gaze_data['gaze_y_scaled'],
     cmap='Reds',
     fill=True,
-    alpha=0.9,       # Strong visibility
-    bw_adjust=0.2,   # Tighter clusters
+    alpha=0.9,
+    bw_adjust=0.2,
     thresh=0.01,
     levels=100
 )
@@ -52,11 +58,15 @@ plt.scatter(
 
 # Set the plot limits and labels
 ax.set_xlim(0, img_width)
-ax.set_ylim(img_height, 0)  # Invert Y-axis to match image coordinates
+ax.set_ylim(img_height, 0)
 ax.set_xlabel('X Coordinate (pixels)')
 ax.set_ylabel('Y Coordinate (pixels)')
 ax.set_title('Amazon Product Page Gaze Heatmap with Rescaled Gaze Points')
 plt.legend()
+
+# ✅ Save the figure before showing
+plt.savefig(f"{output_folder}/{output_filename}", dpi=300)
+print(f"Heatmap saved as '{output_folder}/{output_filename}'")
 
 # Show the heatmap overlay
 plt.show()
