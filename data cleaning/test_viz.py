@@ -65,7 +65,7 @@ axes[0].scatter(
 )
 axes[0].set_xlim(0, img_width)
 axes[0].set_ylim(img_height, 0)
-axes[0].set_title('Heatmap Overlay: Cleaned Amazon CSV (Raw Gaze Data)')
+axes[0].set_title('Heatmap Overlay: Cleaned CSV (Raw Gaze Data)')
 axes[0].set_xlabel('X Coordinate (pixels)')
 axes[0].set_ylabel('Y Coordinate (pixels)')
 axes[0].legend()
