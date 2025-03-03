@@ -6,11 +6,11 @@ from sklearn.preprocessing import MinMaxScaler
 import os
 
 # ======= CONFIGURATION =======
-cleaned_csv = "data cleaning/clean_csv/cleaned_steam.csv"
-centroids_csv = "data cleaning/centroid/centroids_steam.csv"
-screenshot_path = "data cleaning/screenshots/steam.png"
+cleaned_csv = "data cleaning/clean_csv/cleaned_nbc.csv"
+centroids_csv = "data cleaning/centroid/centroids_nbcshopping.csv"
+screenshot_path = "data cleaning/screenshots/nbc.png"
 output_folder = "data cleaning/heatmaps"
-output_filename = "side_by_side_heatmap_steam.png"
+output_filename = "side_by_side_heatmap_nbc.png"
 # =============================
 
 # Create the heatmaps folder if it doesn't exist
