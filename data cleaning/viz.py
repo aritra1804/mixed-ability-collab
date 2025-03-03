@@ -6,10 +6,10 @@ from sklearn.preprocessing import MinMaxScaler
 import os
 
 # ======= CONFIGURATION =======
-cleaned_csv = "data cleaning/clean_csv/cleaned_amazon.csv"
-screenshot_path = "data cleaning/screenshots/amazon.png"
+cleaned_csv = "data cleaning/clean_csv/cleaned_steam.csv"
+screenshot_path = "data cleaning/screenshots/steam.png"
 output_folder = "data cleaning/heatmaps"
-output_filename = "amazon_gaze_heatmap.png"
+output_filename = "steam_gaze_heatmap.png"
 # =============================
 
 # Create the heatmaps folder if it doesn't exist
@@ -61,7 +61,7 @@ ax.set_xlim(0, img_width)
 ax.set_ylim(img_height, 0)
 ax.set_xlabel('X Coordinate (pixels)')
 ax.set_ylabel('Y Coordinate (pixels)')
-ax.set_title('Amazon Product Page Gaze Heatmap with Rescaled Gaze Points')
+ax.set_title('Page Gaze Heatmap with Rescaled Gaze Points')
 plt.legend()
 
 # ✅ Save the figure before showing

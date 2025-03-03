@@ -6,11 +6,11 @@ from sklearn.preprocessing import MinMaxScaler
 import os
 
 # ======= CONFIGURATION =======
-cleaned_csv = "data cleaning/clean_csv/cleaned_amazon.csv"
-centroids_csv = "data cleaning/centroid/centroids_amazon.csv"
-screenshot_path = "data cleaning/screenshots/amazon.png"
+cleaned_csv = "data cleaning/clean_csv/cleaned_steam.csv"
+centroids_csv = "data cleaning/centroid/centroids_steam.csv"
+screenshot_path = "data cleaning/screenshots/steam.png"
 output_folder = "data cleaning/heatmaps"
-output_filename = "side_by_side_heatmap_amazon.png"
+output_filename = "side_by_side_heatmap_steam.png"
 # =============================
 
 # Create the heatmaps folder if it doesn't exist
@@ -93,7 +93,7 @@ axes[1].scatter(
 )
 axes[1].set_xlim(0, img_width)
 axes[1].set_ylim(img_height, 0)
-axes[1].set_title('Heatmap Overlay: Centroids Amazon CSV (Fixation Clusters)')
+axes[1].set_title('Heatmap Overlay: Centroids CSV (Fixation Clusters)')
 axes[1].set_xlabel('X Coordinate (pixels)')
 axes[1].set_ylabel('Y Coordinate (pixels)')
 axes[1].legend()

@@ -5,7 +5,7 @@ import seaborn as sns
 import os
 
 # Load the raw gaze data CSV
-file_path = "data cleaning/csv/output_amazon.csv"
+file_path = "data cleaning/csv/output_steam.csv"
 df = pd.read_csv(file_path)
 
 # Filter for valid gaze points
@@ -42,7 +42,7 @@ output_folder = "data cleaning/clean_csv"
 os.makedirs(output_folder, exist_ok=True)
 
 # Save the cleaned data inside the 'clean_csv' folder
-output_path = os.path.join(output_folder, "cleaned_amazon.csv")
+output_path = os.path.join(output_folder, "cleaned_steam.csv")
 cleaned_gaze_data.to_csv(output_path, index=False)
 
-print("Cleaned gaze data saved as 'cleaned_amazon.csv'.")
+print("Cleaned gaze data saved")
