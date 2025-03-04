@@ -64,9 +64,8 @@ ax.set_ylabel('Y Coordinate (pixels)')
 ax.set_title('Page Gaze Heatmap with Rescaled Gaze Points')
 plt.legend()
 
-# ✅ Save the figure before showing
+# Save the figure before showing
 plt.savefig(f"{output_folder}/{output_filename}", dpi=300)
 print(f"Heatmap saved as '{output_folder}/{output_filename}'")
 
-# Show the heatmap overlay
 plt.show()

@@ -26,7 +26,7 @@ valid_gaze_data[['gaze_x', 'gaze_y']] = valid_gaze_data['left_gaze_point_on_disp
 # Remove rows with invalid or missing coordinates
 valid_gaze_data = valid_gaze_data.dropna(subset=['gaze_x', 'gaze_y'])
 
-# Define screen resolution (based on your screenshot)
+# Define screen resolution
 screen_width = 1228
 screen_height = 768
 
@@ -41,7 +41,7 @@ cleaned_gaze_data = valid_gaze_data.drop(columns=['device_time_stamp', 'system_t
 output_folder = "data cleaning/clean_csv"
 os.makedirs(output_folder, exist_ok=True)
 
-# Save the cleaned data inside the 'clean_csv' folder
+# Save the cleaned data
 output_path = os.path.join(output_folder, "cleaned_steam.csv")
 cleaned_gaze_data.to_csv(output_path, index=False)
 
