@@ -99,6 +99,58 @@ The raw data displayed above has red and blue displaying the calculated position
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+## CSV Data Explanation
+
+This project produces two key CSV files from the gaze data collected with the Tobii Pro Fusion eye tracker.
+
+---
+
+### output.csv
+
+This file contains **raw gaze data** and additional computed features for each gaze sample.
+
+| Column Name | Description |
+|-------------|-------------|
+| **new_timestamps** | System time (UTC) when the gaze sample was recorded. |
+| **device_time_stamp** | Time (in microseconds) from the eye tracker’s internal clock (since start). |
+| **left_gaze_point_on_display_area** | `[x, y]` coordinates (in pixels) of the left eye gaze on the screen. |
+| **right_gaze_point_on_display_area** | `[x, y]` coordinates (in pixels) of the right eye gaze on the screen. |
+| **inter_gaze_point_on_display_area** | `[x, y]` interpolated gaze point when valid data was missing. |
+| **selected_eye** | The eye used for this data point (`left`, `right`, `inter`, or `none`). |
+| **index** | Sequential index of the gaze sample. |
+| **angular_distance** | Angular distance (degrees) between gaze points in the velocity calculation window. |
+| **velocity** | Gaze velocity (degrees/second), computed from angular distance over time. |
+| **window_1 / window_2** | Indices of the first and last points in the velocity window for the gaze sample. |
+| **gaze_origin_in_user_coordinate_system** | `[x, y, z]` position of the user's head relative to the tracker (in millimeters). |
+| **validity columns** | Values like `left_gaze_origin_validity` or `inter_gaze_origin_validity` (1 = valid, 0 = invalid). |
+
+---
+
+### centroids.csv
+
+This file contains **fixation (centroid) data** computed from stable gaze clusters using the I-VT fixation filter.
+
+| Column Name | Description |
+|-------------|-------------|
+| **id** | List of indices from `output.csv` that form this fixation. |
+| **start** | Start time of the fixation (microseconds, device timestamp). |
+| **end** | End time of the fixation (microseconds, device timestamp). |
+| **x_avg** | Average X-coordinate (pixels) of the fixation center. |
+| **y_avg** | Average Y-coordinate (pixels) of the fixation center. |
+| **x_list** | All X-coordinates (pixels) of gaze points in the fixation. |
+| **y_list** | All Y-coordinates (pixels) of gaze points in the fixation. |
+| **origin** | `[x, y, z]` head position (User Coordinate System) during the fixation. |
+
+---
+
+### Notes:
+- **Coordinate systems**: Screen coordinates are scaled to the monitor (e.g., 1920x1200 pixels). 
+- **Device time**: All timestamps are in microseconds and reset when the device restarts.
+- **Dominant eye**: The dominant eye is used for primary data collection. This can be set in the code (default is `left`).
+- **Interpolation**: Missing gaze data is filled via linear interpolation if the gap is short enough, improving fixation detection.
+- **Fixations (centroids)**: Grouped gaze points where the gaze was relatively stable, indicating attention on a specific area of the screen.
+
+
 <!-- CONTACT -->
 ## Contact
 
