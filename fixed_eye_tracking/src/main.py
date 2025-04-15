@@ -13,20 +13,20 @@ def main():
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    # Take Screenshot FIRST
+    # Take Screenshot First
     screenshot_path = os.path.join(output_dir, f"{timestamp}_screenshot.png")
     print(f"\n Please open the screen to capture...")
-    print(" Taking screenshot in 5 seconds...")
+    print(f" Taking screenshot in 5 seconds...")
     time.sleep(5)
     screenshot = pyautogui.screenshot()
     screenshot.save(screenshot_path)
     print(" Screenshot saved at:", screenshot_path)
 
-    # Start Gaze Data Collection
+    # Collect Gaze Data
     gaze_csv_path = collect_gaze_data(timestamp)
 
     # Run IVT
-    fixation_csv_path = process_gaze_data(gaze_csv_path)
+    fixation_csv_path = process_gaze_data(gaze_csv_path, timestamp)
 
     # Visualization
     improved_capture_and_visualize(
