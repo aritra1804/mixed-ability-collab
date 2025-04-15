@@ -13,7 +13,7 @@ def main():
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    # STEP 1 — Take Screenshot FIRST
+    # Take Screenshot FIRST
     screenshot_path = os.path.join(output_dir, f"{timestamp}_screenshot.png")
     print(f"\n Please open the screen to capture...")
     print(" Taking screenshot in 5 seconds...")
@@ -22,19 +22,19 @@ def main():
     screenshot.save(screenshot_path)
     print(" Screenshot saved at:", screenshot_path)
 
-    # STEP 2 — Start Gaze Data Collection
+    # Start Gaze Data Collection
     gaze_csv_path = collect_gaze_data(timestamp)
 
-    # STEP 3 — Run IVT
+    # Run IVT
     fixation_csv_path = process_gaze_data(gaze_csv_path)
 
-    # STEP 4 — Visualization
+    # Visualization
     improved_capture_and_visualize(
         gaze_csv_path=gaze_csv_path,
         fixation_csv_path=fixation_csv_path,
         screenshot_name=f"{timestamp}_screenshot.png",
         output_dir=output_dir,
-        delay=0  # No delay now — screenshot already taken
+        delay=0  
     )
 
 
