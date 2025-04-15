@@ -15,12 +15,12 @@ def main():
 
     # STEP 1 — Take Screenshot FIRST
     screenshot_path = os.path.join(output_dir, f"{timestamp}_screenshot.png")
-    print(f"\n⚠️  Please open the screen to capture...")
-    print("📸 Taking screenshot in 5 seconds...")
+    print(f"\n Please open the screen to capture...")
+    print(" Taking screenshot in 5 seconds...")
     time.sleep(5)
     screenshot = pyautogui.screenshot()
     screenshot.save(screenshot_path)
-    print("✅ Screenshot saved at:", screenshot_path)
+    print(" Screenshot saved at:", screenshot_path)
 
     # STEP 2 — Start Gaze Data Collection
     gaze_csv_path = collect_gaze_data(timestamp)

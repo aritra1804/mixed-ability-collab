@@ -23,7 +23,7 @@ def improved_capture_and_visualize(gaze_csv_path, fixation_csv_path, screenshot_
     if not os.path.exists(screenshot_path):
         raise FileNotFoundError(f"Screenshot not found at: {screenshot_path}")
 
-    print(f"\n📸 Using screenshot: {screenshot_path}")
+    print(f"\n Using screenshot: {screenshot_path}")
 
     # Load gaze and fixation data
     gaze_df = pd.read_csv(gaze_csv_path)
@@ -58,7 +58,7 @@ def improved_capture_and_visualize(gaze_csv_path, fixation_csv_path, screenshot_
     plt.savefig(vis_path, bbox_inches='tight')
     plt.close()
 
-    print("✅ Visualization saved to:", vis_path)
+    print("Visualization saved to:", vis_path)
 
     return {
         "screenshot_path": screenshot_path,
