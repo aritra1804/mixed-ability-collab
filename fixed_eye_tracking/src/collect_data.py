@@ -61,6 +61,6 @@ def collect_gaze_data(timestamp):
 
 
 if __name__ == "__main__":
-    # fallback if you want to run directly (but not recommended)
+    # fallback if you want to run directly (testing)
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
     collect_gaze_data(ts)

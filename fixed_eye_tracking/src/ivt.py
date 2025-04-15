@@ -3,32 +3,16 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 
-
 def compute_centroid(points):
-    """
-    Computes the centroid (average point) of a list of (x, y) points.
-    """
     if not points:
         return None
     points_array = np.array(points)
     return tuple(points_array.mean(axis=0))
 
-
-def to_human(ts):
-    """
-    Convert timestamp to human-readable format.
-    """
-    return datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S.%f')
-
-
-def process_gaze_data(gaze_csv_path):
-    """
-    Reads raw gaze data CSV, computes velocities, detects fixations, computes centroids,
-    and adds both raw & human-readable start/end timestamps for each fixation.
-    """
+def process_gaze_data(gaze_csv_path, timestamp):
     df = pd.read_csv(gaze_csv_path)
 
-    # Calculate differences between consecutive points
+    # Calculate differences
     df['dx'] = df['x'].diff()
     df['dy'] = df['y'].diff()
     df['dt'] = df['timestamp'].diff()
@@ -37,7 +21,7 @@ def process_gaze_data(gaze_csv_path):
     df['velocity'] = np.sqrt(df['dx']**2 + df['dy']**2) / df['dt']
     df['velocity'].fillna(0, inplace=True)
 
-    # Threshold for fixations
+    # Threshold for fixation
     velocity_threshold = 0.15
     df['fixation'] = df['velocity'] < velocity_threshold
 
@@ -58,8 +42,6 @@ def process_gaze_data(gaze_csv_path):
                 fixations.append({
                     'start_timestamp': start_time,
                     'end_timestamp': end_time,
-                    'start_time_readable': to_human(start_time),
-                    'end_time_readable': to_human(end_time),
                     'x': centroid[0],
                     'y': centroid[1]
                 })
@@ -71,16 +53,14 @@ def process_gaze_data(gaze_csv_path):
         fixations.append({
             'start_timestamp': start_time,
             'end_timestamp': end_time,
-            'start_time_readable': to_human(start_time),
-            'end_time_readable': to_human(end_time),
             'x': centroid[0],
             'y': centroid[1]
         })
 
-    # Save to output
     output_dir = os.path.join(os.getcwd(), "output")
     os.makedirs(output_dir, exist_ok=True)
-    fixation_csv_path = os.path.join(output_dir, "fixation_centroids.csv")
+    fixation_csv_path = os.path.join(output_dir, f"fixation_centroids_{timestamp}.csv")
+
     fixation_df = pd.DataFrame(fixations)
     fixation_df.to_csv(fixation_csv_path, index=False)
 
@@ -90,7 +70,7 @@ def process_gaze_data(gaze_csv_path):
 
 if __name__ == "__main__":
     import sys
-    if len(sys.argv) < 2:
-        print("Usage: python ivt.py <gaze_csv_path>")
+    if len(sys.argv) < 3:
+        print("Usage: python ivt.py <gaze_csv_path> <timestamp>")
     else:
-        process_gaze_data(sys.argv[1])
+        process_gaze_data(sys.argv[1], sys.argv[2])
