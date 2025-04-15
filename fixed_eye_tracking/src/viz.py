@@ -2,6 +2,8 @@ import os
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import pandas as pd
+import pyautogui
+
 
 def normalized_to_pixels(normalized_point, width, height):
     """
@@ -27,9 +29,8 @@ def capture_and_visualize(gaze_csv_path, fixation_csv_path):
     fixation_points = list(zip(fixation_df['x'], fixation_df['y']))
 
     # Attempt to load an existing screenshot from output folder; otherwise, capture one using pyautogui.
-    screenshot_path = os.path.join(os.getcwd(), "output", "screenshot.png")
+    screenshot_path = os.path.join(os.getcwd(), "output", "screenshot2.png")
     if not os.path.exists(screenshot_path):
-        import pyautogui
         os.makedirs(os.path.join(os.getcwd(), "output"), exist_ok=True)
         screenshot = pyautogui.screenshot()
         screenshot.save(screenshot_path)
