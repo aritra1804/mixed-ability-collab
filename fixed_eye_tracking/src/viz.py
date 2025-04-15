@@ -68,3 +68,74 @@ if __name__ == "__main__":
         print("Usage: python viz.py <gaze_csv_path> <fixation_csv_path>")
     else:
         capture_and_visualize(sys.argv[1], sys.argv[2])
+
+
+def improved_capture_and_visualize(gaze_csv_path, fixation_csv_path, screenshot_name="screenshot.png", output_dir="output"):
+    """
+    Improved visualization function:
+    1. Captures live screenshot using pyautogui
+    2. Saves screenshot, gaze CSV, fixation CSV with timestamp
+    3. Plots gaze points & fixation centroids over screenshot
+    """
+
+    # Create output directory if doesn't exist
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Generate timestamp
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+    # Take live screenshot
+    screenshot_path = os.path.join(output_dir, f"{timestamp}_{screenshot_name}")
+    screenshot = pyautogui.screenshot()
+    screenshot.save(screenshot_path)
+
+    # Load gaze and fixation data
+    gaze_df = pd.read_csv(gaze_csv_path)
+    fixation_df = pd.read_csv(fixation_csv_path)
+
+    # Save copies with timestamp for both CSVs
+    gaze_out_path = os.path.join(output_dir, f"gaze_data_{timestamp}.csv")
+    fixation_out_path = os.path.join(output_dir, f"fixation_centroids_{timestamp}.csv")
+    gaze_df.to_csv(gaze_out_path, index=False)
+    fixation_df.to_csv(fixation_out_path, index=False)
+
+    # Load Screenshot Image
+    img = mpimg.imread(screenshot_path)
+    img_height, img_width = img.shape[:2]
+
+    # Convert normalized (0-1) coordinates to pixel coordinates
+    gaze_df['x_pix'] = gaze_df['x'] * img_width
+    gaze_df['y_pix'] = gaze_df['y'] * img_height
+    fixation_df['x_pix'] = fixation_df['x'] * img_width
+    fixation_df['y_pix'] = fixation_df['y'] * img_height
+
+    # Plot Overlay
+    plt.figure(figsize=(12, 8))
+    plt.imshow(img)
+    plt.scatter(gaze_df['x_pix'], gaze_df['y_pix'], c='red', s=10, alpha=0.4, label='Gaze Points')
+    plt.scatter(fixation_df['x_pix'], fixation_df['y_pix'], c='blue', marker='x', s=80, label='Fixation Centroids', edgecolors='white')
+
+    plt.legend()
+    plt.axis('off')
+    plt.title("Gaze and Fixation Overlay")
+
+    vis_path = os.path.join(output_dir, f"visualization_{timestamp}.png")
+    plt.savefig(vis_path, bbox_inches='tight')
+    plt.close()
+
+    print("Visualization Saved at:", vis_path)
+
+    return {
+        "screenshot_path": screenshot_path,
+        "gaze_csv": gaze_out_path,
+        "fixation_csv": fixation_out_path,
+        "visualization_path": vis_path
+    }
+
+
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) < 3:
+        print("Usage: python viz.py <gaze_csv_path> <fixation_csv_path>")
+    else:
+        improved_capture_and_visualize(sys.argv[1], sys.argv[2])
