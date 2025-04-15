@@ -9,6 +9,9 @@ def compute_centroid(points):
     points_array = np.array(points)
     return tuple(points_array.mean(axis=0))
 
+def to_human(ts):
+    return datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S.%f')
+
 def process_gaze_data(gaze_csv_path, timestamp):
     df = pd.read_csv(gaze_csv_path)
 
@@ -42,6 +45,8 @@ def process_gaze_data(gaze_csv_path, timestamp):
                 fixations.append({
                     'start_timestamp': start_time,
                     'end_timestamp': end_time,
+                    'start_time_readable': to_human(start_time),
+                    'end_time_readable': to_human(end_time),
                     'x': centroid[0],
                     'y': centroid[1]
                 })
@@ -53,6 +58,8 @@ def process_gaze_data(gaze_csv_path, timestamp):
         fixations.append({
             'start_timestamp': start_time,
             'end_timestamp': end_time,
+            'start_time_readable': to_human(start_time),
+            'end_time_readable': to_human(end_time),
             'x': centroid[0],
             'y': centroid[1]
         })
@@ -71,6 +78,6 @@ def process_gaze_data(gaze_csv_path, timestamp):
 if __name__ == "__main__":
     import sys
     if len(sys.argv) < 3:
-        print("Usage: python ivt.py <gaze_csv_path> <timestamp>")
+        print("python ivt.py <gaze_csv_path> <timestamp>")
     else:
         process_gaze_data(sys.argv[1], sys.argv[2])
