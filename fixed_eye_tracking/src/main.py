@@ -41,6 +41,54 @@
 # if __name__ == "__main__":
 #     main()
 
+# import os
+# import time
+# import pyautogui
+# from datetime import datetime
+# from collect_data import collect_gaze_data
+# from ivt import process_gaze_data
+# from viz import improved_capture_and_visualize
+
+# def main():
+#     output_dir = os.path.join(os.getcwd(), "output")
+#     os.makedirs(output_dir, exist_ok=True)
+
+#     # 0) Ask user for dominant eye
+#     dominant_eye = ""
+#     while dominant_eye not in ('left', 'right', 'both'):
+#         dominant_eye = input("Choose your dominant eye ('left', 'right'): ").strip().lower()
+
+#     # 1) Take Screenshot
+#     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+#     shot_name = f"{timestamp}_screenshot.png"
+#     print("\n Please switch to the screen to capture...")
+#     print(" Taking screenshot in 5 seconds...")
+#     time.sleep(5)
+#     shot = pyautogui.screenshot()
+#     shot.save(os.path.join(output_dir, shot_name))
+#     print("Screenshot saved at:", os.path.join(output_dir, shot_name))
+
+#     # 2) Collect Gaze Data (using chosen eye)
+#     gaze_csv = collect_gaze_data(dominant_eye, timestamp)
+
+#     # 3) IVT & Fixations
+#     fixation_csv = process_gaze_data(gaze_csv, timestamp)
+
+#     # 4) Visualization (no extra delay)
+#     improved_capture_and_visualize(
+#         gaze_csv_path=gaze_csv,
+#         fixation_csv_path=fixation_csv,
+#         screenshot_name=shot_name,
+#         output_dir=output_dir,
+#         delay=0
+#     )
+
+# if __name__ == "__main__":
+#     main()
+
+
+# main.py
+
 import os
 import time
 import pyautogui
@@ -50,37 +98,43 @@ from ivt import process_gaze_data
 from viz import improved_capture_and_visualize
 
 def main():
-    output_dir = os.path.join(os.getcwd(), "output")
-    os.makedirs(output_dir, exist_ok=True)
+    # Base output folder
+    base_out = os.path.join(os.getcwd(), "output")
+    # Sub‐folders
+    screenshots_dir     = os.path.join(base_out, "screenshots")
+    fixations_dir       = os.path.join(base_out, "fixation_centroids")
+    visualization_dir   = os.path.join(base_out, "visualization")
+    # Ensure they exist
+    for d in (screenshots_dir, fixations_dir, visualization_dir):
+        os.makedirs(d, exist_ok=True)
 
     # 0) Ask user for dominant eye
     dominant_eye = ""
-    while dominant_eye not in ('left', 'right', 'both'):
-        dominant_eye = input("Choose your dominant eye ('left', 'right'): ").strip().lower()
+    while dominant_eye not in ("left", "right", "both"):
+        dominant_eye = input("Choose your dominant eye ('left', 'right', or 'both'): ").strip().lower()
 
-    # 1) Take Screenshot
+    # 1) Take screenshot into screenshots/
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     shot_name = f"{timestamp}_screenshot.png"
-    print("\n Please switch to the screen to capture...")
-    print(" Taking screenshot in 5 seconds...")
+    shot_path = os.path.join(screenshots_dir, shot_name)
+    print("\n  Please switch to the screen to capture...")
+    print("Taking screenshot in 5 seconds...")
     time.sleep(5)
-    shot = pyautogui.screenshot()
-    shot.save(os.path.join(output_dir, shot_name))
-    print("Screenshot saved at:", os.path.join(output_dir, shot_name))
+    pyautogui.screenshot().save(shot_path)
+    print("Screenshot saved at:", shot_path)
 
-    # 2) Collect Gaze Data (using chosen eye)
+    # 2) Collect gaze data → saves to data/gaze_data_<timestamp>.csv
     gaze_csv = collect_gaze_data(dominant_eye, timestamp)
 
-    # 3) IVT & Fixations
+    # 3) Process IVT → saves to output/fixation_centroids/fixation_centroids_<timestamp>.csv
     fixation_csv = process_gaze_data(gaze_csv, timestamp)
 
-    # 4) Visualization (no extra delay)
+    # 4) Visualization → reads screenshot from screenshots/, writes to visualization/
     improved_capture_and_visualize(
         gaze_csv_path=gaze_csv,
         fixation_csv_path=fixation_csv,
-        screenshot_name=shot_name,
-        output_dir=output_dir,
-        delay=0
+        screenshot_path=shot_path,
+        output_base=base_out
     )
 
 if __name__ == "__main__":

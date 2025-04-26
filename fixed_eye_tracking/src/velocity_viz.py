@@ -23,7 +23,7 @@ def plot_velocity_distribution_with_thresholds(gaze_csv_path, thresholds=[0.1, 0
 
     # Add vertical lines for each threshold
     for v in thresholds:
-        plt.axvline(v, linestyle='--', linewidth=2, label=f'Threshold = {v}')
+        plt.axvline(v, linestyle='-', linewidth=2, label=f'Threshold = {v}')
 
     plt.title('Velocity Distribution of Gaze Data with Multiple Thresholds')
     plt.xlabel('Velocity (Normalized units / sec)')
