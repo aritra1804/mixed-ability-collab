@@ -34,7 +34,7 @@ def create_gaze_video(gaze_csv_path, screenshot_path, output_video_path):
 
 
 create_gaze_video(
-    gaze_csv_path="data/gaze_data_20250415_161813.csv",
-    screenshot_path="output/20250415_161813_screenshot.png",
-    output_video_path="output/gaze_animation_20250415_161813.mp4"
+    gaze_csv_path="data/gaze_data_20250416_111134.csv",
+    screenshot_path="output/20250416_111134_screenshot.png",
+    output_video_path="output/gaze_animation_20250416_111134.mp4"
 )
