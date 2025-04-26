@@ -153,7 +153,6 @@ def process_gaze_data(gaze_csv_path, timestamp, output_base="output"):
             'x': cx, 'y': cy, 'z': cz
         })
 
-    # 5) Save to output/fixation_centroids/
     fc_dir = os.path.join(output_base, "fixation_centroids")
     os.makedirs(fc_dir, exist_ok=True)
     out_csv = os.path.join(fc_dir, f"fixation_centroids_{timestamp}.csv")

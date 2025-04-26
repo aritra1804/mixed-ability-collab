@@ -76,13 +76,13 @@ def main():
     pyautogui.screenshot().save(shot_path)
     print("Screenshot saved at:", shot_path)
 
-    # 2) Collect gaze data → saves to data/gaze_data_<timestamp>.csv
+    # 2) Collect gaze data
     gaze_csv = collect_gaze_data(dominant_eye, timestamp)
 
-    # 3) Process IVT → saves to output/fixation_centroids/fixation_centroids_<timestamp>.csv
+    # 3) Process IVT
     fixation_csv = process_gaze_data(gaze_csv, timestamp)
 
-    # 4) Visualization → reads screenshot from screenshots/, writes to visualization/
+    # 4) Visualization
     improved_capture_and_visualize(
         gaze_csv_path=gaze_csv,
         fixation_csv_path=fixation_csv,
