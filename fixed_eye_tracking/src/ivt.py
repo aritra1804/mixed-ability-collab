@@ -83,8 +83,6 @@
 #         process_gaze_data(sys.argv[1], sys.argv[2])
 
 
-# ivt.py
-
 import os
 import pandas as pd
 import numpy as np

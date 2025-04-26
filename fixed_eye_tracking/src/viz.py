@@ -65,8 +65,6 @@
 #         improved_capture_and_visualize(sys.argv[1], sys.argv[2])
 
 
-# viz.py
-
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
